@@ -11,3 +11,15 @@
     margin: 20px;
     font-size: .4em;
 }
+
+#resetButton {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #0099FF;
+  border-radius: 15px;
+  border-style: none;
+  color: #FFFFFF;
+  font-size: 1em;
+  padding: 10px;
+}

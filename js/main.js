@@ -88,7 +88,7 @@ var updateMeToID = function(id) {
         if (i != id) {
             nodes[i].icon.fill = '#FFFF00';
             nodes[i].highlight.fill = '#FF9900';
-          }
+        }
     }
     createGuides();
     selectedNodeID = -1;
@@ -97,8 +97,8 @@ var updateMeToID = function(id) {
 var createGuides = function() {
     // remove old guides
     for (var i = 0; i < guides.length; i++) {
-      background.remove(guides[i].guide);
-      background.remove(guides[i].preline);
+        background.remove(guides[i].guide);
+        background.remove(guides[i].preline);
     }
     guides = [];
     var onlyHomeLeft = true;
@@ -320,31 +320,31 @@ var getNodeClosestToDirection = function(targetAngle) {
     var closeNodes = [];
     var angleThreshold = 15;
     for (var i = 0; i < nodes.length; i++) {
-      // only search not yet visited nodes
-      if (nodes[i].visited) continue;
+        // only search not yet visited nodes
+        if (nodes[i].visited) continue;
 
-      var angle = getAngleToNode(i);
-      // console.log("target angle: " + targetAngle + " angle to node: " + angle);
+        var angle = getAngleToNode(i);
+        // console.log("target angle: " + targetAngle + " angle to node: " + angle);
 
-      if ((Math.abs(angle - targetAngle) < angleThreshold) || (Math.abs(360 + angle - targetAngle) < angleThreshold)) {
-        // console.log("added node " + i + " with angle: " + angle);
-        closeNodes.push(nodes[i]);
-      }
+        if ((Math.abs(angle - targetAngle) < angleThreshold) || (Math.abs(360 + angle - targetAngle) < angleThreshold)) {
+            // console.log("added node " + i + " with angle: " + angle);
+            closeNodes.push(nodes[i]);
+        }
     }
 
-    if(closeNodes.length >= 1) {
-      var dist = 1000;
-      for (var i = 0; i < closeNodes.length; i++) {
-        var xDiff = Math.abs(closeNodes[i].icon.translation.x - me.icon.translation.x);
-        var yDiff = Math.abs(closeNodes[i].icon.translation.y - me.icon.translation.y);
-        var nodeDist = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-        // console.log("close node at distance: " + nodeDist);
-        if(nodeDist < dist) {
-          id = closeNodes[i].id;
-          dist = nodeDist;
+    if (closeNodes.length >= 1) {
+        var dist = 1000;
+        for (var i = 0; i < closeNodes.length; i++) {
+            var xDiff = Math.abs(closeNodes[i].icon.translation.x - me.icon.translation.x);
+            var yDiff = Math.abs(closeNodes[i].icon.translation.y - me.icon.translation.y);
+            var nodeDist = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+            // console.log("close node at distance: " + nodeDist);
+            if (nodeDist < dist) {
+                id = closeNodes[i].id;
+                dist = nodeDist;
+            }
         }
-      }
-      return id;
+        return id;
     }
 
     // or just find the closest old fashioned style
@@ -420,6 +420,19 @@ var initNodes = function() {
 
 // make travel points
 var createNodes = function() {
+    // remove nodes if any are present
+    for (var i = 0; i < nodes.length; i++) {
+        two.remove(nodes[i].icon);
+        two.remove(nodes[i].highlight);
+    }
+    nodes = [];
+
+    // remove leftover connections
+    for (var i = 0; i < connections.length; i++) {
+        background.remove(connections[i].line);
+    }
+
+
     while (nodes.length < numNodes) {
         var x_pos = Math.random() * $(window).width();
         var y_pos = Math.random() * $(window).height();
@@ -548,3 +561,10 @@ obj.addEventListener('touchend', function(event) {
     // hideGuideLines();
     // drawToSelectedPlayer();
 }, false);
+
+// reset button
+document.getElementById("resetButton").addEventListener("click", function() {
+    console.log("reset button pressed");
+    createNodes();
+    updateMeToID(0); // start as the first player created
+});
