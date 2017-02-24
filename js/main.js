@@ -18,6 +18,7 @@
 // icons
 var me;
 var nodes = [];
+var guides = [];
 var connections = [];
 var selectedNodeID = -1;
 var lastSelectedNode;
@@ -76,31 +77,35 @@ var createNode = function(id, x, y) {
     });
 };
 
-var updateAngles = function() {
-    //  for each(node in nodes) {
-    //
-    //      if (node.id != me.id) {
-    //          var theta = Math.atan2(me.icon.translation.x - x, me.icon.translation.y - y) + Math.PI / 2;
-    //          if (theta > 2 * Math.PI) theta -= 2 * Math.PI;
-    //          if (theta < 0) theta += 2 * Math.PI;
-    //          //theta = 2 * Math.PI - theta;
-    //          var degrees = theta * 180 / Math.PI;
-    //          console.log("node " + id + " is " + Math.floor(degrees) + "º from me");
-    //      }
-    //  }
-};
-
 var updateMeToID = function(id) {
     me = nodes[id];
     nodes[id].visited = true;
-    // fill visited w/ red
+    // fill me w/ red
     nodes[id].icon.fill = '#FF0000';
-    //  updateConnections();
-    //  updateAngles();
+    // fill others w/ yellow
+    for (var i = 0; i < nodes.length; i++) {
+        if (i != id)
+            nodes[i].icon.fill = '#FFFF00';
+    }
+    createGuides();
 };
 
-var createConnections = function() {
-    var guide = two.makeLine(x, y, me.icon.translation.x, me.icon.translation.y);
+var createGuides = function() {
+    guides = [];
+    var onlyHomeLeft = true;
+    for (var i = 0; i < nodes.length; i++) {
+        if (!nodes[i].visited && !nodes[i].home) {
+            onlyHomeLeft = false;
+            createGuideToNode(i);
+        }
+    }
+    if (onlyHomeLeft) {
+        createGuideToNode(0); // only draw to home node
+    }
+};
+
+var createGuideToNode = function(id) {
+    var guide = two.makeLine(me.icon.translation.x, me.icon.translation.y, nodes[id].icon.translation.x, nodes[id].icon.translation.y);
     guide.stroke = '#00CCFF';
     guide.linewidth = 4;
     guide.opacity = 0;
@@ -118,14 +123,25 @@ var createConnections = function() {
     line.linewidth = 4;
     background.add(line);
 
-    connections = [];
-
-    connections.push({
+    guides.push({
+        id: id,
         guide: guide,
         pre_line: pre_line,
         line: line
     });
 };
+
+var createConnectionToNode = function(id) {
+    var line = two.makeLine(me.icon.translation.x, me.icon.translation.y, nodes[id].icon.translation.x, nodes[id].icon.translation.y);
+    line.stroke = '#000000';
+    line.linewidth = 4;
+    line.opacity = 1;
+    background.add(line);
+    connections.push({
+        id: id,
+        line: line,
+    });
+}
 
 var makeMeBig = function() {
     new TWEEN.Tween(me.icon)
@@ -224,8 +240,8 @@ var removeLineFromNode = function(id) {
 };
 
 var showGuideLines = function() {
-    for (var i = 0; i < numNodes; i++) {
-        new TWEEN.Tween(nodes[i].guide)
+    for (var i = 0; i < guides.length; i++) {
+        new TWEEN.Tween(guides[i].guide)
             .to({
                 opacity: 0.1
             }, 250)
@@ -235,8 +251,8 @@ var showGuideLines = function() {
 };
 
 var hideGuideLines = function() {
-    for (var i = 0; i < numNodes; i++) {
-        new TWEEN.Tween(nodes[i].guide)
+    for (var i = 0; i < guides.length; i++) {
+        new TWEEN.Tween(guides[i].guide)
             .to({
                 opacity: 0
             }, 250)
@@ -275,11 +291,11 @@ var drawToSelectedNode = function() {
 };
 
 var getAngleToNode = function(id) {
-  // get angle to nod
-  var angle = Math.atan2(me.icon.translation.y - nodes[id].icon.translation.y, nodes[id].icon.translation.x - me.icon.translation.x);
-  angle = (Math.floor(angle * 180 / 3.14159) + 360 ) % 360;
+    // get angle to nod
+    var angle = Math.atan2(me.icon.translation.y - nodes[id].icon.translation.y, nodes[id].icon.translation.x - me.icon.translation.x);
+    angle = (Math.floor(angle * 180 / 3.14159) + 360) % 360;
 
-  return angle;
+    return angle;
 };
 
 var getNodeClosestToDirection = function(targetAngle) {
@@ -295,8 +311,8 @@ var getNodeClosestToDirection = function(targetAngle) {
     // unvisited one.
     for (var i = 0; i < numNodes; i++) {
 
-      // only search not yet visited nodes
-      if(nodes[i].visited) continue;
+        // only search not yet visited nodes
+        if (nodes[i].visited) continue;
 
         var angle = getAngleToNode(i);
         if (Math.abs(angle - targetAngle) < diff) {
@@ -362,7 +378,7 @@ var initNodes = function() {
     foreground = two.makeGroup();
 
     createNodes();
-    updateMeToID(0);  // start as the first player created
+    updateMeToID(0); // start as the first player created
 };
 
 
@@ -443,7 +459,7 @@ obj.addEventListener('touchstart', function(event) {
         startTouchPoint.x = touch.pageX;
         startTouchPoint.y = touch.pageY;
         makeMeBig();
-        // showGuideLines();
+        showGuideLines();
     }
 }, false);
 
@@ -485,6 +501,8 @@ obj.addEventListener('touchend', function(event) {
         // var nodeID = Math.floor(20*Math.random());
 
         makeMeSmall();
+        hideGuideLines();
+        createConnectionToNode(nodeID);
 
         console.log("now at: " + nodeID + " node");
         updateMeToID(nodeID);
