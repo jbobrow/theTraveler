@@ -308,7 +308,6 @@ var getAngleToNode = function(id) {
 
 var getNodeClosestToDirection = function(targetAngle) {
     var id = 0;
-    var diff = 360;
 
     // TODO: Might be worth measuring distance and making the selection
     // based on both angle proximity and distance proximity
@@ -317,7 +316,41 @@ var getNodeClosestToDirection = function(targetAngle) {
     // <possible algorithm>
     // look at all nodes within 15º either direction and choose the closest
     // unvisited one.
-    for (var i = 0; i < numNodes; i++) {
+    // create array of nodes within 15º of aim
+    var closeNodes = [];
+    var angleThreshold = 15;
+    for (var i = 0; i < nodes.length; i++) {
+      // only search not yet visited nodes
+      if (nodes[i].visited) continue;
+
+      var angle = getAngleToNode(i);
+      // console.log("target angle: " + targetAngle + " angle to node: " + angle);
+
+      if ((Math.abs(angle - targetAngle) < angleThreshold) || (Math.abs(360 + angle - targetAngle) < angleThreshold)) {
+        // console.log("added node " + i + " with angle: " + angle);
+        closeNodes.push(nodes[i]);
+      }
+    }
+
+    if(closeNodes.length >= 1) {
+      var dist = 1000;
+      for (var i = 0; i < closeNodes.length; i++) {
+        var xDiff = Math.abs(closeNodes[i].icon.translation.x - me.icon.translation.x);
+        var yDiff = Math.abs(closeNodes[i].icon.translation.y - me.icon.translation.y);
+        var nodeDist = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+        // console.log("close node at distance: " + nodeDist);
+        if(nodeDist < dist) {
+          id = closeNodes[i].id;
+          dist = nodeDist;
+        }
+      }
+      return id;
+    }
+
+    // or just find the closest old fashioned style
+    var diff = 360;
+
+    for (var i = 0; i < nodes.length; i++) {
 
         // only search not yet visited nodes
         if (nodes[i].visited) continue;
@@ -471,7 +504,7 @@ obj.addEventListener('touchmove', function(event) {
     if (event.targetTouches.length == 1) {
         var touch = event.targetTouches[0];
         // location of touch
-        console.log("moved touch: (" + touch.pageX + ", " + touch.pageY + ")");
+        // console.log("moved touch: (" + touch.pageX + ", " + touch.pageY + ")");
         document.getElementById('x_coord_move').innerHTML = Math.floor(touch.pageX);
         document.getElementById('y_coord_move').innerHTML = Math.floor(touch.pageY);
 
