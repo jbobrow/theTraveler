@@ -239,14 +239,6 @@ var makeNodeSmall = function(id) {
         .start();
 };
 
-var drawLineToNode = function(id) {
-
-};
-
-var removeLineFromNode = function(id) {
-
-};
-
 var showGuideLines = function() {
     for (var i = 0; i < guides.length; i++) {
         new TWEEN.Tween(guides[i].guide)
@@ -309,14 +301,15 @@ var getAngleToNode = function(id) {
 var getNodeClosestToDirection = function(targetAngle) {
     var id = 0;
 
-    // TODO: Might be worth measuring distance and making the selection
+    // Might be worth measuring distance and making the selection
     // based on both angle proximity and distance proximity
     // i.e. the user most likely wants the closest node in that general
     // direction, could be frustrating to miss, if easy to miss
-    // <possible algorithm>
-    // look at all nodes within 15º either direction and choose the closest
-    // unvisited one.
-    // create array of nodes within 15º of aim
+
+    // Algorithm implemented
+    // look at all nodes within 15º either direction and
+    // choose the closest unvisited one.
+
     var closeNodes = [];
     var angleThreshold = 15;
     for (var i = 0; i < nodes.length; i++) {
@@ -369,13 +362,6 @@ var getNodeClosestToDirection = function(targetAngle) {
 };
 
 var updateLineDirection = function(angle) {
-    var theta = angle * Math.Pi / 180.0;
-    // aim_line.vertices[1].x = Math.round(line_length * Math.cos(theta));
-    // aim_line.vertices[1].y = -Math.round(line_length * Math.sin(theta));
-    //console.log("line point: (" + aim_line.vertices[1].x + ", " + aim_line.vertices[1].y + ")");
-
-    //aim_circle.translation.x = me.icon.translation.x + Math.round(2 * nodeSize * Math.cos(Math.atan2(x, y) - Math.PI / 2));
-    //aim_circle.translation.y = me.icon.translation.y + Math.round(2 * nodeSize * Math.sin(Math.atan2(x, y) - Math.PI / 2));
 
     var nodeID = getNodeClosestToDirection(angle);
     if (selectedNodeID < 0) {
@@ -386,19 +372,8 @@ var updateLineDirection = function(angle) {
         makeNodeBig(nodeID);
         selectedNodeID = nodeID;
     }
-    // find node closest to direction
-    // if doesn't exist a node currently selected
-    // connect to node
-    // else
-    // if different from node currently selected
-    // disconnect from current node
-    // select new node to connect to
-
 };
 
-var drawLineToNode = function(node) {
-
-}
 
 
 /*
