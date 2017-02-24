@@ -284,7 +284,11 @@ var getAngleToNode = function(id) {
 var getNodeClosestToDirection = function(targetAngle) {
     var id = 0;
     var diff = 360;
-    for (var i = 0; i < numNodes; i++) { // TODO: fix this
+    for (var i = 0; i < numNodes; i++) {
+
+      // only search not yet visited nodes
+      if(nodes[i].visited) continue;
+
         var angle = getAngleToNode(i);
         if (Math.abs(angle - targetAngle) < diff) {
             diff = Math.abs(angle - targetAngle);
