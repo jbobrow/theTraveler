@@ -141,7 +141,7 @@ var createConnectionToNode = function(id) {
     background.add(line);
     connections.push({
         id: id,
-        line: line,
+        line: line
     });
 }
 
@@ -374,6 +374,16 @@ var updateLineDirection = function(angle) {
     }
 };
 
+// fill the solution with a polygon
+var createSolutionShape = function() {
+  // createPolygon
+  // add first point
+  for (var i=0; i<connections.length; i++) {
+    var pos = nodes[connections[i].id].icon.translation;
+    // add points of polygon
+  }
+  // close polygon
+}
 
 
 /*
