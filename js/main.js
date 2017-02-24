@@ -82,10 +82,13 @@ var updateMeToID = function(id) {
     nodes[id].visited = true;
     // fill me w/ red
     nodes[id].icon.fill = '#FF0000';
+    nodes[id].highlight.fill = '#00CCFF';
     // fill others w/ yellow
     for (var i = 0; i < nodes.length; i++) {
-        if (i != id)
+        if (i != id) {
             nodes[i].icon.fill = '#FFFF00';
+            nodes[i].highlight.fill = '#FF9900';
+          }
     }
     createGuides();
     selectedNodeID = -1;
@@ -501,6 +504,7 @@ obj.addEventListener('touchend', function(event) {
         // var nodeID = Math.floor(20*Math.random());
 
         makeMeSmall();
+        makeNodeSmall(nodeID);
         hideGuideLines();
         createConnectionToNode(nodeID);
 
