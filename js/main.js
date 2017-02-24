@@ -414,8 +414,8 @@ obj.addEventListener('touchstart', function(event) {
         var touch = event.targetTouches[0];
         // location of touch
         console.log("began touch: (" + touch.pageX + ", " + touch.pageY + ")");
-        document.getElementById('x_coord_start').innerHTML = touch.pageX;
-        document.getElementById('y_coord_start').innerHTML = touch.pageY;
+        document.getElementById('x_coord_start').innerHTML = Math.floor(touch.pageX);
+        document.getElementById('y_coord_start').innerHTML = Math.floor(touch.pageY);
         startTouchPoint.x = touch.pageX;
         startTouchPoint.y = touch.pageY;
         // makeMeBig();
@@ -429,8 +429,8 @@ obj.addEventListener('touchmove', function(event) {
         var touch = event.targetTouches[0];
         // location of touch
         console.log("moved touch: (" + touch.pageX + ", " + touch.pageY + ")");
-        document.getElementById('x_coord_move').innerHTML = touch.pageX;
-        document.getElementById('y_coord_move').innerHTML = touch.pageY;
+        document.getElementById('x_coord_move').innerHTML = Math.floor(touch.pageX);
+        document.getElementById('y_coord_move').innerHTML = Math.floor(touch.pageY);
 
         // update angle
         var angle = Math.atan2(startTouchPoint.y - touch.pageY, touch.pageX - startTouchPoint.x);
@@ -443,14 +443,17 @@ obj.addEventListener('touchmove', function(event) {
 }, false);
 
 obj.addEventListener('touchend', function(event) {
-    // location of touch
-    console.log("ended touch: (" + event.pageX + ", " + event.pageY + ")");
-    document.getElementById('x_coord_end').innerHTML = event.pageX;
-    document.getElementById('y_coord_end').innerHTML = event.pageY;
-    // choose randomly to make one me
-    var nodeID = Math.floor(20*Math.random());
-    console.log("now at: " + nodeID + " node");
-    updateMeToID(nodeID);
+  if (event.changedTouches.length == 1) {
+      var touch = event.changedTouches[0];
+      // location of touch
+      console.log("ended touch: (" + touch.pageX + ", " + touch.pageY + ")");
+      document.getElementById('x_coord_end').innerHTML = Math.floor(touch.pageX);
+      document.getElementById('y_coord_end').innerHTML = Math.floor(touch.pageY);
+      // choose randomly to make one me
+      var nodeID = Math.floor(20*Math.random());
+      console.log("now at: " + nodeID + " node");
+      updateMeToID(nodeID);
+    }
     // makeMeSmall();
     // makePlayerSmall(selectedPlayerID);
     // hideGuideLines();
