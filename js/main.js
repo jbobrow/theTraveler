@@ -71,7 +71,8 @@ var createNode = function(id, x, y) {
         id: id,
         icon: icon,
         highlight: highlight,
-        visited: false
+        visited: false,
+        home: false,
     });
 };
 
@@ -139,12 +140,12 @@ var makeMeBig = function() {
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
-    new TWEEN.Tween(aim_line)
-        .to({
-            opacity: 0.5
-        }, 500)
-        .easing(TWEEN.Easing.Elastic.Out)
-        .start();
+    // new TWEEN.Tween(aim_line)
+    //     .to({
+    //         opacity: 0.5
+    //     }, 500)
+    //     .easing(TWEEN.Easing.Elastic.Out)
+    //     .start();
 };
 
 var makeMeSmall = function() {
@@ -160,12 +161,12 @@ var makeMeSmall = function() {
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
-    new TWEEN.Tween(aim_line)
-        .to({
-            opacity: 0.0
-        }, 500)
-        .easing(TWEEN.Easing.Elastic.Out)
-        .start();
+    // new TWEEN.Tween(aim_line)
+    //     .to({
+    //         opacity: 0.0
+    //     }, 500)
+    //     .easing(TWEEN.Easing.Elastic.Out)
+    //     .start();
 };
 
 var makeNodeBig = function(id) {
@@ -284,6 +285,14 @@ var getAngleToNode = function(id) {
 var getNodeClosestToDirection = function(targetAngle) {
     var id = 0;
     var diff = 360;
+
+    // TODO: Might be worth measuring distance and making the selection
+    // based on both angle proximity and distance proximity
+    // i.e. the user most likely wants the closest node in that general
+    // direction, could be frustrating to miss, if easy to miss
+    // <possible algorithm>
+    // look at all nodes within 15º either direction and choose the closest
+    // unvisited one.
     for (var i = 0; i < numNodes; i++) {
 
       // only search not yet visited nodes
@@ -353,7 +362,7 @@ var initNodes = function() {
     foreground = two.makeGroup();
 
     createNodes();
-    updateMeToID(1);  // start as the first player created
+    updateMeToID(0);  // start as the first player created
 };
 
 
@@ -365,6 +374,8 @@ var createNodes = function() {
         if (isWellSpacedPosition(x_pos, y_pos))
             createNode(nodes.length, x_pos, y_pos);
     }
+    // make first node home
+    nodes[0].home = true;
 };
 
 
@@ -431,7 +442,7 @@ obj.addEventListener('touchstart', function(event) {
         document.getElementById('y_coord_start').innerHTML = Math.floor(touch.pageY);
         startTouchPoint.x = touch.pageX;
         startTouchPoint.y = touch.pageY;
-        // makeMeBig();
+        makeMeBig();
         // showGuideLines();
     }
 }, false);
@@ -472,10 +483,12 @@ obj.addEventListener('touchend', function(event) {
         // choose item closest to angle to travel to
         var nodeID = getNodeClosestToDirection(angle);
         // var nodeID = Math.floor(20*Math.random());
+
+        makeMeSmall();
+
         console.log("now at: " + nodeID + " node");
         updateMeToID(nodeID);
     }
-    // makeMeSmall();
     // makePlayerSmall(selectedPlayerID);
     // hideGuideLines();
     // drawToSelectedPlayer();
