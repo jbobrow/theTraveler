@@ -26,7 +26,7 @@ var lastPreSelectedNode;
 
 var numNodes = 20;
 var nodeSize = 8;
-var icon_spacing = 20;
+var icon_spacing = 40;
 var line_length = 28;
 
 var aim_line;
@@ -88,9 +88,15 @@ var updateMeToID = function(id) {
             nodes[i].icon.fill = '#FFFF00';
     }
     createGuides();
+    selectedNodeID = -1;
 };
 
 var createGuides = function() {
+    // remove old guides
+    for (var i = 0; i < guides.length; i++) {
+      background.remove(guides[i].guide);
+      background.remove(guides[i].preline);
+    }
     guides = [];
     var onlyHomeLeft = true;
     for (var i = 0; i < nodes.length; i++) {
@@ -117,17 +123,10 @@ var createGuideToNode = function(id) {
     pre_line.linewidth = 4;
     background.add(pre_line);
 
-    var line = two.makeLine(me.icon.translation.x, me.icon.translation.y, me.icon.translation.x, me.icon.translation.y);
-    line.stroke = '#000000';
-    line.opacity = 1;
-    line.linewidth = 4;
-    background.add(line);
-
     guides.push({
         id: id,
         guide: guide,
-        pre_line: pre_line,
-        line: line
+        preline: pre_line,
     });
 };
 
@@ -200,7 +199,10 @@ var makeNodeBig = function(id) {
         .start();
     var x_pos = nodes[id].icon.translation.x - me.icon.translation.x;
     var y_pos = nodes[id].icon.translation.y - me.icon.translation.y;
-    new TWEEN.Tween(nodes[id].preline.vertices[1])
+    var guide = guides.filter(function(o) {
+        return o.id == id;
+    });
+    new TWEEN.Tween(guide[0].preline.vertices[1])
         .to({
             x: x_pos,
             y: y_pos
@@ -222,7 +224,10 @@ var makeNodeSmall = function(id) {
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
-    new TWEEN.Tween(nodes[id].preline.vertices[1])
+    var guide = guides.filter(function(o) {
+        return o.id == id;
+    });
+    new TWEEN.Tween(guide[0].preline.vertices[1])
         .to({
             x: 0,
             y: 0
@@ -327,21 +332,16 @@ var getNodeClosestToDirection = function(targetAngle) {
     return id;
 };
 
-var updateLineDirection = function(x, y) {
-    //console.log("my position: ("+me.icon.translation.x+", "+me.icon.translation.y+")");
-    var theta = Math.atan2(x, y) - Math.PI / 2;
-    if (theta < 0) theta += 2 * Math.PI;
-    theta = 2 * Math.PI - theta;
-    document.getElementById('angle').innerHTML = Math.floor(theta * 180 / Math.PI);
-    //console.log("degrees: " + theta * 180 / Math.PI);
-    aim_line.vertices[1].x = Math.round(line_length * Math.cos(theta));
-    aim_line.vertices[1].y = -Math.round(line_length * Math.sin(theta));
+var updateLineDirection = function(angle) {
+    var theta = angle * Math.Pi / 180.0;
+    // aim_line.vertices[1].x = Math.round(line_length * Math.cos(theta));
+    // aim_line.vertices[1].y = -Math.round(line_length * Math.sin(theta));
     //console.log("line point: (" + aim_line.vertices[1].x + ", " + aim_line.vertices[1].y + ")");
 
     //aim_circle.translation.x = me.icon.translation.x + Math.round(2 * nodeSize * Math.cos(Math.atan2(x, y) - Math.PI / 2));
     //aim_circle.translation.y = me.icon.translation.y + Math.round(2 * nodeSize * Math.sin(Math.atan2(x, y) - Math.PI / 2));
 
-    var nodeID = getNodeClosestToDirection(Math.floor(theta * 180 / Math.PI));
+    var nodeID = getNodeClosestToDirection(angle);
     if (selectedNodeID < 0) {
         makeNodeBig(nodeID);
         selectedNodeID = nodeID;
@@ -478,7 +478,7 @@ obj.addEventListener('touchmove', function(event) {
 
         document.getElementById('angle').innerHTML = angle;
 
-        // updateLineDirection(touch.pageX - startTouchPoint.x, startTouchPoint.y - touch.pageY);
+        updateLineDirection(angle);
     }
 }, false);
 
