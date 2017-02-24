@@ -2,6 +2,11 @@
     font-family: sans-serif;
 }
 
+#debug_data {
+  padding: 10px;
+  font-size: .5em;
+}
+
 #touch_space {
     margin: 20px;
     font-size: .4em;
