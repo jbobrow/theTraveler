@@ -136,7 +136,7 @@ var getTotalConnectionDistance = function() {
 var isWellSpacedPosition = function(x, y) {
 
     // proximity to walls
-    if (x < icon_spacing || x > $(window).width() - icon_spacing || y < icon_spacing || y > $(window).height() - icon_spacing)
+    if (x < icon_spacing || x > $(window).width() - icon_spacing || y < 2*icon_spacing || y > $(window).height() - 2*icon_spacing)
         return false;
 
     // check proximity to other nodes
@@ -642,17 +642,35 @@ obj.addEventListener('touchend', function(event) {
         console.log("now at: " + nodeID + " node");
         updateMeToID(nodeID);
 
-        document.getElementById('distance').innerHTML = getTotalConnectionDistance();
+        var dist = getTotalConnectionDistance();
+        document.getElementById('distance').innerHTML = dist;
+        document.getElementById('sum-distance').innerHTML = dist;
     }
     // makePlayerSmall(selectedPlayerID);
     // hideGuideLines();
     // drawToSelectedPlayer();
 }, false);
 
+// migrate button
+document.getElementById("newButton").addEventListener("click", function() {
+    console.log("migrate button pressed");
+    createNodes();
+    updateMeToID(0); // start as the first player created
+    document.getElementById('distance').innerHTML = 0;
+});
+
 // reset button
 document.getElementById("resetButton").addEventListener("click", function() {
     console.log("reset button pressed");
-    createNodes();
+    // make all nodes not visited
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].visited = false;
+    }
+    // remove leftover connections
+    for (var i = 0; i < connections.length; i++) {
+        background.remove(connections[i].line);
+    }
+    connections = [];
     updateMeToID(0); // start as the first player created
     document.getElementById('distance').innerHTML = 0;
 });

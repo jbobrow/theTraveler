@@ -28,6 +28,18 @@ body {
   padding: 10px;
 }
 
+#newButton {
+  position: fixed;
+  top: 20px;
+  right: 90px;
+  background: #FF0000;
+  border-radius: 15px;
+  border-style: none;
+  color: #FFFFFF;
+  font-size: 1em;
+  padding: 10px;
+}
+
 #summary {
   z-index: 1000;
   visibility: hidden;
@@ -49,4 +61,11 @@ body {
 
 #scale img {
   width: 150px;
+}
+
+#dist {
+  position: fixed;
+  bottom: 7px;
+  right: 20px;
+  font-size: .75em;
 }

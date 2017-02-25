@@ -11,19 +11,23 @@
 <body>
     <div id="two"></div>
     <button type="button" id="resetButton">Reset</button>
+    <button type="button" id="newButton">Migrate</button>
     <div id="debug_data">
         <h2>Screen Size: (<span id="screen_width">-1</span>, <span id="screen_height">-1</span>)</h2>
         <h3>Touch Down: (<span id="x_coord_start">-1</span>, <span id="y_coord_start">-1</span>)</h3>
         <h3>Touch Move: (<span id="x_coord_move">-1</span>, <span id="y_coord_move">-1</span>)</h3>
         <h3>Touch Up: (<span id="x_coord_end">-1</span>, <span id="y_coord_end">-1</span>)</h3>
-        <h3>Angle: <span id="angle">0</span></h2>
-        <h3>Distance: <span id="distance">0</span></h2>
+        <h3>Angle: <span id="angle">0</span></h3>
+        <h3>Distance: <span id="distance">0</span></h3>
     </div>
     <div id="summary">
       <p>In 24.5 seconds, you completed a round trip of 3541 mi. The shortest round trip possible was 2450 mi.</p>
     </div>
     <div id="scale">
       <img src="img/miles_scale_100px_white.png"/>
+    </div>
+    <div id="dist">
+      <h2>Distance: <span id="sum-distance">0</span></h2>
     </div>
     <script src="libs/jquery.js"></script>
     <script src="libs/two.js"></script>
