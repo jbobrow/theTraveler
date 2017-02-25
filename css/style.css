@@ -53,14 +53,28 @@ body {
   line-height: 1.4em;
 }
 
-#scale {
-  position: fixed;
-  bottom: 10px;
-  left: 20px;
+/* for low resolution display */
+.scale {
+    background-image: url(../img/miles_scale_100px_white.png);
+    background-size: 150px 40px;
+    height: 40px;
+    width: 150px;
+    position: fixed;
+    bottom: 10px;
+    left: 20px;
 }
-
-#scale img {
-  width: 150px;
+/* for high resolution display */
+@media only screen and (-Webkit-min-device-pixel-ratio: 1.5),
+only screen and (-moz-min-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 3/2),
+only screen and (min-device-pixel-ratio: 1.5) {
+  .scale {
+      background: url(../img/miles_scale_100px_white@2x.png) no-repeat;
+      background-size: 150px 40px;
+      position: fixed;
+      bottom: 10px;
+      left: 20px;
+  }
 }
 
 #dist {
