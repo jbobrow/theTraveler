@@ -32,10 +32,105 @@ var line_length = 28;
 var aim_line;
 var aim_circle;
 
+var joystick;
+
 // make layers
 var background;
 var middleground;
 var foreground;
+
+
+var createJoystick = function(id, x, y) {
+
+    var origin = two.makeCircle(x, y, 40);
+    origin.stroke = '#000000';
+    origin.linewidth = 0;
+    origin.opacity = 0.0;
+    origin.fill = '#000000';
+    background.add(origin);
+
+    var thumb = two.makeCircle(x, y, 30);
+    thumb.stroke = '#000000';
+    thumb.linewidth = 0;
+    thumb.opacity = 0.0;
+    thumb.fill = '#000000';
+    background.add(thumb);
+
+    joystick = {
+        origin: origin,
+        thumb: thumb,
+        visible: false
+    };
+};
+
+var showJoystick = function() {
+    new TWEEN.Tween(joystick.origin)
+        .to({
+            scale: 1,
+            opacity: 0.2
+        }, 250)
+        .easing(TWEEN.Easing.Elastic.Out)
+        .start();
+
+    new TWEEN.Tween(joystick.thumb)
+        .to({
+            scale: 1,
+            opacity: 0.2
+        }, 250)
+        .easing(TWEEN.Easing.Elastic.Out)
+        .start();
+};
+
+var hideJoystick = function() {
+    new TWEEN.Tween(joystick.origin)
+        .to({
+            scale: 0,
+            opacity: 0.0
+        }, 250)
+        .easing(TWEEN.Easing.Elastic.Out)
+        .start();
+
+    new TWEEN.Tween(joystick.thumb)
+        .to({
+            scale: 0,
+            opacity: 0.0
+        }, 250)
+        .easing(TWEEN.Easing.Elastic.Out)
+        .start();
+
+};
+
+var updateJoystick = function(startX, startY, x, y) {
+    joystick.origin.translation.x = startX;
+    joystick.origin.translation.y = startY;
+    // translate only a fraction of the distance from the center
+    var xDiff = x-startX < 0 ? -Math.sqrt(startX - x) : Math.sqrt(x-startX);
+    var yDiff = y-startY < 0 ? -Math.sqrt(startY - y) : Math.sqrt(y-startY);
+    joystick.thumb.translation.x = startX + xDiff;//startX + Math.sqrt(x - startX); //startX + (20 * Math.cos(angle*Math.Pi/180.0));
+    joystick.thumb.translation.y = startY + yDiff;//startY + Math.sqrt(y - startY); //startY + (20 * Math.sin(angle*Math.Pi/180.0));
+};
+
+var getTotalConnectionDistance = function() {
+  var fromID = 0;
+  var total = 0;
+
+  for(var i=0; i<connections.length; i++) {
+    var fromX = nodes[fromID].icon.translation.x;
+    var fromY = nodes[fromID].icon.translation.y;
+    var toX = nodes[connections[i].id].icon.translation.x;
+    var toY = nodes[connections[i].id].icon.translation.y;
+
+    var xDiff = fromX - toX;
+    var yDiff = fromY - toY;
+
+    var distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+    total += distance;
+    // update the from id
+    fromID = connections[i].id;
+  }
+
+  return Math.floor(total);
+};
 
 
 var isWellSpacedPosition = function(x, y) {
@@ -376,13 +471,13 @@ var updateLineDirection = function(angle) {
 
 // fill the solution with a polygon
 var createSolutionShape = function() {
-  // createPolygon
-  // add first point
-  for (var i=0; i<connections.length; i++) {
-    var pos = nodes[connections[i].id].icon.translation;
-    // add points of polygon
-  }
-  // close polygon
+    // createPolygon
+    // add first point
+    for (var i = 0; i < connections.length; i++) {
+        var pos = nodes[connections[i].id].icon.translation;
+        // add points of polygon
+    }
+    // close polygon
 }
 
 
@@ -416,7 +511,7 @@ var createNodes = function() {
     for (var i = 0; i < connections.length; i++) {
         background.remove(connections[i].line);
     }
-
+    connections = [];
 
     while (nodes.length < numNodes) {
         var x_pos = Math.random() * $(window).width();
@@ -458,6 +553,7 @@ $(function() {
     two.update();
 
     initNodes();
+    createJoystick();
 
     _.defer(function() {
 
@@ -494,6 +590,8 @@ obj.addEventListener('touchstart', function(event) {
         startTouchPoint.y = touch.pageY;
         makeMeBig();
         showGuideLines();
+        showJoystick();
+        updateJoystick(startTouchPoint.x, startTouchPoint.y, startTouchPoint.x, startTouchPoint.y);
     }
 }, false);
 
@@ -513,6 +611,7 @@ obj.addEventListener('touchmove', function(event) {
         document.getElementById('angle').innerHTML = angle;
 
         updateLineDirection(angle);
+        updateJoystick(startTouchPoint.x, startTouchPoint.y, touch.pageX, touch.pageY);
     }
 }, false);
 
@@ -538,9 +637,12 @@ obj.addEventListener('touchend', function(event) {
         makeNodeSmall(nodeID);
         hideGuideLines();
         createConnectionToNode(nodeID);
+        hideJoystick();
 
         console.log("now at: " + nodeID + " node");
         updateMeToID(nodeID);
+
+        document.getElementById('distance').innerHTML = getTotalConnectionDistance();
     }
     // makePlayerSmall(selectedPlayerID);
     // hideGuideLines();
@@ -552,4 +654,5 @@ document.getElementById("resetButton").addEventListener("click", function() {
     console.log("reset button pressed");
     createNodes();
     updateMeToID(0); // start as the first player created
+    document.getElementById('distance').innerHTML = 0;
 });
