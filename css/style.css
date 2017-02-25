@@ -2,6 +2,10 @@
     font-family: sans-serif;
 }
 
+body {
+  background: #F9F9F9;
+}
+
 #debug_data {
   padding: 10px;
   font-size: .5em;
@@ -22,4 +26,27 @@
   color: #FFFFFF;
   font-size: 1em;
   padding: 10px;
+}
+
+#summary {
+  z-index: 1000;
+  visibility: hidden;
+  width: 80%;
+  margin: 5%;
+  padding: 5%;
+  border-radius: 15px;
+  background: rgba(0,0,0,.3);
+  color: #FFFFFF;
+  font-size: 1.2em;
+  line-height: 1.4em;
+}
+
+#scale {
+  position: fixed;
+  bottom: 10px;
+  left: 20px;
+}
+
+#scale img {
+  width: 150px;
 }
