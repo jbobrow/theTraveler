@@ -104,39 +104,44 @@ var updateJoystick = function(startX, startY, x, y) {
     joystick.origin.translation.x = startX;
     joystick.origin.translation.y = startY;
     // translate only a fraction of the distance from the center
-    var xDiff = x-startX < 0 ? -Math.sqrt(startX - x) : Math.sqrt(x-startX);
-    var yDiff = y-startY < 0 ? -Math.sqrt(startY - y) : Math.sqrt(y-startY);
-    joystick.thumb.translation.x = startX + xDiff;//startX + Math.sqrt(x - startX); //startX + (20 * Math.cos(angle*Math.Pi/180.0));
-    joystick.thumb.translation.y = startY + yDiff;//startY + Math.sqrt(y - startY); //startY + (20 * Math.sin(angle*Math.Pi/180.0));
+    var xDiff = x - startX < 0 ? -Math.sqrt(startX - x) : Math.sqrt(x - startX);
+    var yDiff = y - startY < 0 ? -Math.sqrt(startY - y) : Math.sqrt(y - startY);
+    joystick.thumb.translation.x = startX + xDiff; //startX + Math.sqrt(x - startX); //startX + (20 * Math.cos(angle*Math.Pi/180.0));
+    joystick.thumb.translation.y = startY + yDiff; //startY + Math.sqrt(y - startY); //startY + (20 * Math.sin(angle*Math.Pi/180.0));
 };
 
 var getTotalConnectionDistance = function() {
-  var fromID = 0;
-  var total = 0;
+    var fromID = 0;
+    var total = 0;
 
-  for(var i=0; i<connections.length; i++) {
-    var fromX = nodes[fromID].icon.translation.x;
-    var fromY = nodes[fromID].icon.translation.y;
-    var toX = nodes[connections[i].id].icon.translation.x;
-    var toY = nodes[connections[i].id].icon.translation.y;
+    for (var i = 0; i < connections.length; i++) {
+        var fromX = nodes[fromID].icon.translation.x;
+        var fromY = nodes[fromID].icon.translation.y;
+        var toX = nodes[connections[i].id].icon.translation.x;
+        var toY = nodes[connections[i].id].icon.translation.y;
 
-    var xDiff = fromX - toX;
-    var yDiff = fromY - toY;
+        var xDiff = fromX - toX;
+        var yDiff = fromY - toY;
 
-    var distance = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
-    total += distance;
-    // update the from id
-    fromID = connections[i].id;
-  }
+        var distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+        total += distance;
+        // update the from id
+        fromID = connections[i].id;
+    }
 
-  return Math.floor(total);
+    return Math.floor(total);
 };
 
+// find the shortest possible path
+var findTheShortestPossiblePath = function() {
+  // var minDist = 10000000;
+  // for(var i=0; i<)
+};
 
 var isWellSpacedPosition = function(x, y) {
 
     // proximity to walls
-    if (x < icon_spacing || x > $(window).width() - icon_spacing || y < 2*icon_spacing || y > $(window).height() - 2*icon_spacing)
+    if (x < icon_spacing || x > $(window).width() - icon_spacing || y < 2 * icon_spacing || y > $(window).height() - 2 * icon_spacing)
         return false;
 
     // check proximity to other nodes
@@ -469,16 +474,33 @@ var updateLineDirection = function(angle) {
     }
 };
 
+var isComplete = function() {
+  for(var i=0; i<nodes.length; i++) {
+    if(!nodes[i].visited)
+      return false;
+  }
+  return true;
+};
+
 // fill the solution with a polygon
 var createSolutionShape = function() {
     // createPolygon
+    var points = [];
     // add first point
     for (var i = 0; i < connections.length; i++) {
         var pos = nodes[connections[i].id].icon.translation;
+        var anchor = new Two.Anchor(pos.x, pos.y);
         // add points of polygon
+        points.push(anchor);
     }
     // close polygon
-}
+    var solution = two.makePolygon(points, true);
+    solution.stroke = '#000000';
+    solution.linewidth = 0;
+    solution.opacity = 0.5;
+    solution.fill = '#FF00FF';
+    background.add(solution);
+};
 
 
 /*
@@ -495,6 +517,7 @@ var initNodes = function() {
 
     createNodes();
     updateMeToID(0); // start as the first player created
+    nodes[0].visited = false;
 };
 
 
@@ -645,6 +668,10 @@ obj.addEventListener('touchend', function(event) {
         var dist = getTotalConnectionDistance();
         document.getElementById('distance').innerHTML = dist;
         document.getElementById('sum-distance').innerHTML = dist;
+
+        if(isComplete()) {
+          createSolutionShape();
+        }
     }
     // makePlayerSmall(selectedPlayerID);
     // hideGuideLines();
@@ -664,7 +691,7 @@ document.getElementById("resetButton").addEventListener("click", function() {
     console.log("reset button pressed");
     // make all nodes not visited
     for (var i = 0; i < nodes.length; i++) {
-      nodes[i].visited = false;
+        nodes[i].visited = false;
     }
     // remove leftover connections
     for (var i = 0; i < connections.length; i++) {
