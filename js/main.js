@@ -34,6 +34,9 @@ var aim_circle;
 
 var joystick;
 
+var solutionPolygon;
+var isSolved = false;
+
 // make layers
 var background;
 var middleground;
@@ -494,12 +497,12 @@ var createSolutionShape = function() {
         points.push(anchor);
     }
     // close polygon
-    var solution = two.makePolygon(points, true);
-    solution.stroke = '#000000';
-    solution.linewidth = 0;
-    solution.opacity = 0.5;
-    solution.fill = '#FF00FF';
-    background.add(solution);
+    solutionPolygon = two.makePolygon(points, true);
+    solutionPolygon.stroke = '#000000';
+    solutionPolygon.linewidth = 4;
+    solutionPolygon.opacity = 0.5;
+    solutionPolygon.fill = '#0099FF';
+    background.add(solutionPolygon);
 };
 
 
@@ -669,7 +672,8 @@ obj.addEventListener('touchend', function(event) {
         document.getElementById('distance').innerHTML = dist;
         document.getElementById('sum-distance').innerHTML = dist;
 
-        if(isComplete()) {
+        if(isComplete() && !isSolved) {
+          isSolved = true;
           createSolutionShape();
         }
     }
@@ -683,7 +687,12 @@ document.getElementById("newButton").addEventListener("click", function() {
     console.log("migrate button pressed");
     createNodes();
     updateMeToID(0); // start as the first player created
+    nodes[0].visited = false;
+
     document.getElementById('distance').innerHTML = 0;
+    // remove solution
+    background.remove(solutionPolygon);
+    isSolved = false;
 });
 
 // reset button
@@ -697,7 +706,12 @@ document.getElementById("resetButton").addEventListener("click", function() {
     for (var i = 0; i < connections.length; i++) {
         background.remove(connections[i].line);
     }
+    // remove solution
+    background.remove(solutionPolygon);
+    isSolved = false;
     connections = [];
     updateMeToID(0); // start as the first player created
+    nodes[0].visited = false;
+
     document.getElementById('distance').innerHTML = 0;
 });
