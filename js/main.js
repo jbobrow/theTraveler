@@ -137,8 +137,8 @@ var getTotalConnectionDistance = function() {
 
 // find the shortest possible path
 var findTheShortestPossiblePath = function() {
-  // var minDist = 10000000;
-  // for(var i=0; i<)
+    // var minDist = 10000000;
+    // for(var i=0; i<)
 };
 
 var isWellSpacedPosition = function(x, y) {
@@ -176,7 +176,7 @@ var createNode = function(id, x, y) {
         icon: icon,
         highlight: highlight,
         visited: false,
-        home: id==0? true:false,
+        home: id == 0 ? true : false,
     });
 };
 
@@ -308,17 +308,16 @@ var makeNodeBig = function(id) {
     var guide = guides.filter(function(o) {
         return o.id == id;
     });
-    if(guide[0]) {
-      new TWEEN.Tween(guide[0].preline.vertices[1])
-          .to({
-              x: x_pos,
-              y: y_pos
-          }, 500)
-          .easing(TWEEN.Easing.Exponential.Out)
-          .start();
-    }
-    else {
-      console.log("this id doesn't have a guide: " + id);
+    if (guide[0]) {
+        new TWEEN.Tween(guide[0].preline.vertices[1])
+            .to({
+                x: x_pos,
+                y: y_pos
+            }, 500)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .start();
+    } else {
+        console.log("this id doesn't have a guide: " + id);
     }
 };
 
@@ -338,17 +337,16 @@ var makeNodeSmall = function(id) {
     var guide = guides.filter(function(o) {
         return o.id == id;
     });
-    if(guide[0]) {
-      new TWEEN.Tween(guide[0].preline.vertices[1])
-          .to({
-              x: 0,
-              y: 0
-          }, 500)
-          .easing(TWEEN.Easing.Exponential.Out)
-          .start();
-    }
-    else {
-      console.log("this id doesn't have a guide: " + id);
+    if (guide[0]) {
+        new TWEEN.Tween(guide[0].preline.vertices[1])
+            .to({
+                x: 0,
+                y: 0
+            }, 500)
+            .easing(TWEEN.Easing.Exponential.Out)
+            .start();
+    } else {
+        console.log("this id doesn't have a guide: " + id);
     }
 };
 
@@ -424,7 +422,7 @@ var getNodeClosestToDirection = function(targetAngle) {
     // choose the closest unvisited one.
 
     var closeNodes = [];
-    var angleThreshold = 30;
+    var angleThreshold = 45;
     for (var i = 0; i < nodes.length; i++) {
         // only search not yet visited nodes
         if (nodes[i].visited || nodes[i].home) continue;
@@ -440,7 +438,7 @@ var getNodeClosestToDirection = function(targetAngle) {
 
     if (closeNodes.length > 1) {
         var dist = 1000;
-        var angleDistValue = 1000;
+        var angleDistValue = 100000000; // ideally max value...
         console.log("--- Begin Close Nodes ---");
         for (var i = 0; i < closeNodes.length; i++) {
             var xDiff = Math.abs(closeNodes[i].icon.translation.x - me.icon.translation.x);
@@ -448,9 +446,9 @@ var getNodeClosestToDirection = function(targetAngle) {
             var nodeDist = Math.floor(Math.sqrt(xDiff * xDiff + yDiff * yDiff));
             var angleDiff = Math.abs(targetAngle - getAngleToNode(closeNodes[i].id));
             console.log("node " + closeNodes[i].id + " at distance: " + nodeDist + " with angleDiff: " + angleDiff);
-            if(nodeDist*Math.sqrt(angleDiff/angleThreshold) < angleDistValue) {
-              id = closeNodes[i].id;
-              angleDistValue = nodeDist*Math.sqrt(angleDiff/angleThreshold);
+            if (getAngleDistValue(angleDiff, nodeDist) < angleDistValue) {
+                id = closeNodes[i].id;
+                angleDistValue = getAngleDistValue(angleDiff, nodeDist);
             }
             // if (nodeDist < dist) {
             //     id = closeNodes[i].id;
@@ -482,6 +480,11 @@ var getNodeClosestToDirection = function(targetAngle) {
     return id;
 };
 
+var getAngleDistValue = function(angle, distance) {
+    // return distance+Math.sqrt(angle);
+    return distance + (10 * angle);
+}
+
 var updateLineDirection = function(angle) {
 
     var nodeID = getNodeClosestToDirection(angle);
@@ -496,11 +499,11 @@ var updateLineDirection = function(angle) {
 };
 
 var isComplete = function() {
-  for(var i=0; i<nodes.length; i++) {
-    if(!nodes[i].visited)
-      return false;
-  }
-  return true;
+    for (var i = 0; i < nodes.length; i++) {
+        if (!nodes[i].visited)
+            return false;
+    }
+    return true;
 };
 
 // fill the solution with a polygon
@@ -650,9 +653,9 @@ obj.addEventListener('touchmove', function(event) {
 
         // update angle
         var angle = Math.atan2(startTouchPoint.y - touch.pageY, touch.pageX - startTouchPoint.x);
-        angle = (Math.floor(angle * 180 / 3.14159) + 360) % 360;
+        angle = ((angle * 180 / 3.14159) + 360) % 360;
 
-        document.getElementById('angle').innerHTML = angle;
+        document.getElementById('angle').innerHTML = Math.floor(angle);
 
         updateLineDirection(angle);
         updateJoystick(startTouchPoint.x, startTouchPoint.y, touch.pageX, touch.pageY);
@@ -669,9 +672,9 @@ obj.addEventListener('touchend', function(event) {
 
         // update angle
         var angle = Math.atan2(startTouchPoint.y - touch.pageY, touch.pageX - startTouchPoint.x);
-        angle = (Math.floor(angle * 180 / 3.14159) + 360) % 360;
+        angle = ((angle * 180 / 3.14159) + 360) % 360;
 
-        document.getElementById('angle').innerHTML = angle;
+        document.getElementById('angle').innerHTML = Math.floor(angle);
 
         // choose item closest to angle to travel to
         var nodeID = getNodeClosestToDirection(angle);
@@ -690,9 +693,9 @@ obj.addEventListener('touchend', function(event) {
         document.getElementById('distance').innerHTML = dist;
         document.getElementById('sum-distance').innerHTML = dist;
 
-        if(isComplete() && !isSolved) {
-          isSolved = true;
-          createSolutionShape();
+        if (isComplete() && !isSolved) {
+            isSolved = true;
+            createSolutionShape();
         }
     }
     // makePlayerSmall(selectedPlayerID);
@@ -709,8 +712,8 @@ document.getElementById("newButton").addEventListener("click", function() {
 
     document.getElementById('distance').innerHTML = 0;
     // remove solution
-    if(solutionPolygon){
-      background.remove(solutionPolygon);
+    if (solutionPolygon) {
+        background.remove(solutionPolygon);
     }
     isSolved = false;
 });
@@ -727,8 +730,8 @@ document.getElementById("resetButton").addEventListener("click", function() {
         background.remove(connections[i].line);
     }
     // remove solution
-    if(solutionPolygon){
-      background.remove(solutionPolygon);
+    if (solutionPolygon) {
+        background.remove(solutionPolygon);
     }
     isSolved = false;
     connections = [];
