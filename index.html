@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width" />
-    <link rel="stylesheet" type="text/css" href="css/style.css?v20">
+    <link rel="stylesheet" type="text/css" href="css/style.css?v26">
     <title></title>
 </head>
 
@@ -15,12 +15,13 @@
     <button type="button" id="moreNodes">+</button>
     <button type="button" id="lessNodes">-</button>
     <div id="debug_data">
-        <h2>Screen Size: (<span id="screen_width">-1</span>, <span id="screen_height">-1</span>)</h2>
-        <h3>Touch Down: (<span id="x_coord_start">-1</span>, <span id="y_coord_start">-1</span>)</h3>
+        <h2>Map Size: (<span id="screen_width">-1</span>, <span id="screen_height">-1</span>)</h2>
+        <h2><span id="numCities">20</span> Destinations</h2>
+        <!-- <h3>Touch Down: (<span id="x_coord_start">-1</span>, <span id="y_coord_start">-1</span>)</h3>
         <h3>Touch Move: (<span id="x_coord_move">-1</span>, <span id="y_coord_move">-1</span>)</h3>
-        <h3>Touch Up: (<span id="x_coord_end">-1</span>, <span id="y_coord_end">-1</span>)</h3>
-        <h3>Angle: <span id="angle">0</span></h3>
-        <h3>Distance: <span id="distance">0</span></h3>
+        <h3>Touch Up: (<span id="x_coord_end">-1</span>, <span id="y_coord_end">-1</span>)</h3> -->
+        <h3>Compass: <span id="angle">0</span>º</h3>
+        <h3>Distance: <span id="distance">0</span> mi.</h3>
     </div>
     <div id="summary">
       <p>In 24.5 seconds, you completed a round trip of 3541 mi. The shortest round trip possible was 2450 mi.</p>
@@ -28,14 +29,14 @@
     <div class="scale">
     </div>
     <div id="dist">
-      <h2>Distance: <span id="sum-distance">0</span></h2>
+      <h2>Distance: <span id="sum-distance">0</span> mi.</h2>
     </div>
     <script src="libs/jquery.js"></script>
     <script src="libs/two.min.js"></script>
     <script src="libs/tween.js"></script>
     <!-- <script type="text/javascript" src="js/player.js?v2"></script> -->
     <!-- <script type="text/javascript" src="js/game.js?v2"></script> -->
-    <script type="text/javascript" src="js/main.js?v20"></script>
+    <script type="text/javascript" src="js/main.js?v26"></script>
 </body>
 
 </html>
