@@ -307,7 +307,7 @@ var makeNodeBig = function(id) {
         .start();
     new TWEEN.Tween(nodes[id].highlight)
         .to({
-            scale: 3
+            scale: 5
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
