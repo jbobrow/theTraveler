@@ -422,7 +422,7 @@ var getNodeClosestToDirection = function(targetAngle) {
     // choose the closest unvisited one.
 
     var closeNodes = [];
-    var angleThreshold = 45;
+    var angleThreshold = 15;
     for (var i = 0; i < nodes.length; i++) {
         // only search not yet visited nodes
         if (nodes[i].visited || nodes[i].home) continue;
@@ -481,8 +481,9 @@ var getNodeClosestToDirection = function(targetAngle) {
 };
 
 var getAngleDistValue = function(angle, distance) {
-    // return distance+Math.sqrt(angle);
+    // return distance * Math.sqrt(angle);
     return distance + (10 * angle);
+    // return distance + (100 * angle / distance);
 }
 
 var updateLineDirection = function(angle) {
