@@ -176,7 +176,7 @@ var createNode = function(id, x, y) {
         icon: icon,
         highlight: highlight,
         visited: false,
-        home: false,
+        home: id==0? true:false,
     });
 };
 
@@ -448,9 +448,9 @@ var getNodeClosestToDirection = function(targetAngle) {
             var nodeDist = Math.floor(Math.sqrt(xDiff * xDiff + yDiff * yDiff));
             var angleDiff = Math.abs(targetAngle - getAngleToNode(closeNodes[i].id));
             console.log("node " + closeNodes[i].id + " at distance: " + nodeDist + " with angleDiff: " + angleDiff);
-            if(nodeDist*angleDiff/angleThreshold < angleDistValue) {
+            if(nodeDist*Math.sqrt(angleDiff/angleThreshold) < angleDistValue) {
               id = closeNodes[i].id;
-              angleDistValue = nodeDist*angleDiff/angleThreshold;
+              angleDistValue = nodeDist*Math.sqrt(angleDiff/angleThreshold);
             }
             // if (nodeDist < dist) {
             //     id = closeNodes[i].id;
@@ -467,7 +467,7 @@ var getNodeClosestToDirection = function(targetAngle) {
     for (var i = 0; i < nodes.length; i++) {
 
         // only search not yet visited nodes
-        if (nodes[i].visited) continue;
+        if (nodes[i].visited || nodes[i].home) continue;
 
         var angle = getAngleToNode(i);
         if (Math.abs(angle - targetAngle) < diff) {
