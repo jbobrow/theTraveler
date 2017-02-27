@@ -34,6 +34,8 @@ var aim_circle;
 
 var joystick;
 
+var screen_padding = 40;
+
 var solutionPolygon;
 var isSolved = false;
 
@@ -144,8 +146,14 @@ var findTheShortestPossiblePath = function() {
 var isWellSpacedPosition = function(x, y) {
 
     // proximity to walls
-    if (x < icon_spacing || x > $(window).width() - icon_spacing || y < 2 * icon_spacing || y > $(window).height() - 2 * icon_spacing)
+    if (x < screen_padding || x > $(window).width() - screen_padding || y < 2 * screen_padding || y > $(window).height() - 2 * screen_padding)
         return false;
+
+    // determine icon spacing based on number of nodes and screen space
+    var screen_width = window.innerWidth ? window.innerWidth : $(window).width(); //$(window).width();
+    var screen_height = window.innerHeight ? window.innerHeight : $(window).height(); //$(window).height();
+    icon_spacing = Math.sqrt((screen_width - 2*screen_padding) * (screen_height - 4*screen_padding) / numNodes) / 2;
+    console.log("icon spacing for " +numNodes+ " nodes on a " + screen_width + " x " + screen_height + " screen is " + icon_spacing);
 
     // check proximity to other nodes
     for (var i = 0; i < nodes.length; i++) {
@@ -477,6 +485,9 @@ var getNodeClosestToDirection = function(targetAngle) {
             id = i;
         }
     }
+
+    // if the angle diff is really big, maybe open up the angleThreshold and try that again...
+
     return id;
 };
 
@@ -703,6 +714,20 @@ obj.addEventListener('touchend', function(event) {
     // hideGuideLines();
     // drawToSelectedPlayer();
 }, false);
+
+// migrate button
+document.getElementById("moreNodes").addEventListener("click", function() {
+    console.log("add one more node");
+    numNodes++;
+    if(numNodes > 50) numNodes = 50;
+});
+
+// migrate button
+document.getElementById("lessNodes").addEventListener("click", function() {
+  console.log("add one more node");
+  numNodes--;
+  if(numNodes < 10) numNodes = 10;
+});
 
 // migrate button
 document.getElementById("newButton").addEventListener("click", function() {
