@@ -12,8 +12,6 @@
     <div id="two"></div>
     <button type="button" id="resetButton">Reset</button>
     <button type="button" id="newButton">Migrate</button>
-    <button type="button" id="moreNodes">+</button>
-    <button type="button" id="lessNodes">-</button>
     <div id="debug_data">
         <h2>Map Size: (<span id="screen_width">-1</span>, <span id="screen_height">-1</span>)</h2>
         <h2><span id="numCities">20</span> Destinations</h2>
@@ -24,12 +22,15 @@
         <h3>Distance: <span id="distance">0</span> mi.</h3>
     </div>
     <div id="summary">
-      <p>In 24.5 seconds, you completed a round trip of 3541 mi. The shortest round trip possible was 2450 mi.</p>
+      <h1><span id="sum-distance">0</span> mi.</h1>
+      <button type="button" id="moreNodes">+</button>
+      <button type="button" id="lessNodes">-</button>
+      <button>
     </div>
     <div class="scale">
     </div>
     <div id="dist">
-      <h2>Distance: <span id="sum-distance">0</span> mi.</h2>
+      <!-- <h2>Distance: <span id="sum-distance">0</span> mi.</h2> -->
     </div>
     <script src="libs/jquery.js"></script>
     <script src="libs/two.min.js"></script>

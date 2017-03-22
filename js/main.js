@@ -101,6 +101,10 @@ var updatePath = function(x,y) {
       createSolutionShape();
       // celebrate
       celebrate();
+      // show end game stats
+      setTimeout(function () {
+        document.getElementById("summary").style.visibility = "visible";        
+      }, 3000);
     }
     else {
       makeMeSmall();
@@ -602,6 +606,8 @@ document.getElementById("newButton").addEventListener("click", function() {
         background.remove(solutionPolygon);
     }
     isSolved = false;
+    // hide end game stats
+    document.getElementById("summary").style.visibility = "hidden";
 });
 
 // reset button
@@ -624,4 +630,6 @@ document.getElementById("resetButton").addEventListener("click", function() {
     nodes[0].visited = false;
 
     document.getElementById('distance').innerHTML = 0;
+    // hide end game stats
+    document.getElementById("summary").style.visibility = "hidden";
 });
