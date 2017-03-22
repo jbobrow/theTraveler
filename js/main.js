@@ -443,13 +443,9 @@ var createNodes = function() {
     for (var i = 0; i < nodes.length; i++) {
         two.remove(nodes[i].icon);
         two.remove(nodes[i].highlight);
+        background.remove(nodes[i].line);
     }
     nodes = [];
-
-    // remove leftover connections
-    for (var i = 0; i < connections.length; i++) {
-        background.remove(connections[i].line);
-    }
     connections = [];
 
     while (nodes.length < numNodes) {
