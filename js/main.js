@@ -255,18 +255,6 @@ var createGuideToNode = function(id) {
     });
 };
 
-var createConnectionToNode = function(id) {
-    var line = two.makeLine(me.icon.translation.x, me.icon.translation.y, nodes[id].icon.translation.x, nodes[id].icon.translation.y);
-    line.stroke = '#000000';
-    line.linewidth = 4;
-    line.opacity = 1;
-    background.add(line);
-    connections.push({
-        id: id,
-        line: line
-    });
-}
-
 var makeMeBig = function() {
     new TWEEN.Tween(me.icon)
         .to({
@@ -280,12 +268,6 @@ var makeMeBig = function() {
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
-    // new TWEEN.Tween(aim_line)
-    //     .to({
-    //         opacity: 0.5
-    //     }, 500)
-    //     .easing(TWEEN.Easing.Elastic.Out)
-    //     .start();
 };
 
 var makeMeSmall = function() {
@@ -301,12 +283,6 @@ var makeMeSmall = function() {
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
-    // new TWEEN.Tween(aim_line)
-    //     .to({
-    //         opacity: 0.0
-    //     }, 500)
-    //     .easing(TWEEN.Easing.Elastic.Out)
-    //     .start();
 };
 
 var makeNodeBig = function(id) {
@@ -359,43 +335,6 @@ var hideGuideLines = function() {
             .easing(TWEEN.Easing.Elastic.Out)
             .start();
     }
-};
-
-var drawToSelectedNode = function() {
-    // if no change, don't animate
-    if (lastSelectedNode == nodes[selectedNodeID])
-        return;
-
-    var x_pos = nodes[selectedNodeID].icon.translation.x - me.icon.translation.x;
-    var y_pos = nodes[selectedNodeID].icon.translation.y - me.icon.translation.y;
-    new TWEEN.Tween(nodes[selectedNodeID].line.vertices[1])
-        .to({
-            x: x_pos,
-            y: y_pos
-        }, 500)
-        .easing(TWEEN.Easing.Exponential.Out)
-        .start();
-
-    // return old selected line
-    if (lastSelectedNode) {
-        new TWEEN.Tween(lastSelectedNode.line.vertices[1])
-            .to({
-                x: 0,
-                y: 0
-            }, 500)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start();
-    }
-
-    lastSelectedNode = nodes[selectedNodeID];
-};
-
-var getAngleToNode = function(id) {
-    // get angle to nod
-    var angle = Math.atan2(me.icon.translation.y - nodes[id].icon.translation.y, nodes[id].icon.translation.x - me.icon.translation.x);
-    angle = (Math.floor(angle * 180 / 3.14159) + 360) % 360;
-
-    return angle;
 };
 
 // fill the solution with a polygon
