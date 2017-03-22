@@ -92,11 +92,15 @@ var updatePath = function(x,y) {
       me.line.vertices[1].x = nodes[nodeId].icon.translation.x - me.icon.translation.x;
       me.line.vertices[1].y = nodes[nodeId].icon.translation.y - me.icon.translation.y;
       updateMeToID(nodeId);
+      // remove unique color from my position
+      me.icon.fill = '#FFFF00';
+      me.highlight.fill = '#FF9900';
       // set home to visited
       me.visited = true;
       // show solution
       createSolutionShape();
       // celebrate
+      celebrate();
     }
     else {
       makeMeSmall();
@@ -117,6 +121,46 @@ var snapBackToHome = function() {
       }, 200)
       .easing(TWEEN.Easing.Exponential.Out)
       .start();
+};
+
+var celebrate = function() {
+  var duration = 500;
+  var delay = 100;
+
+  for (var i = 0; i < connections.length; i++) {
+
+    // animate the highlight
+    var b = new TWEEN.Tween(nodes[connections[i].id].highlight)
+        .to({
+            scale: 1
+        }, duration)
+        .easing(TWEEN.Easing.Sinusoidal.InOut);
+
+    var a = new TWEEN.Tween(nodes[connections[i].id].highlight)
+        .to({
+            scale: 4
+        }, duration)
+        .delay(i*delay)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .chain(b)
+        .start();
+
+    // animate the iconvar b = new TWEEN.Tween(nodes[connections[i].id].highlight)
+    var d = new TWEEN.Tween(nodes[connections[i].id].icon)
+        .to({
+            scale: 1
+        }, duration)
+        .easing(TWEEN.Easing.Sinusoidal.InOut);
+
+    var c = new TWEEN.Tween(nodes[connections[i].id].icon)
+        .to({
+            scale: 1.5
+        }, duration)
+        .delay(i*delay)
+        .easing(TWEEN.Easing.Sinusoidal.InOut)
+        .chain(d)
+        .start();
+  }
 };
 
 var getTotalConnectionDistance = function() {
