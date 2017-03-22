@@ -24,6 +24,10 @@ var selectedNodeID = -1;
 var lastSelectedNode;
 var lastPreSelectedNode;
 
+// drag specific
+var isTravelling = false;
+var onlyHomeLeft = false;
+
 var numNodes = 20;
 var nodeSize = 8;
 var icon_spacing = 40;
@@ -44,75 +48,75 @@ var background;
 var middleground;
 var foreground;
 
+var createPath = function() {
+  // create an open polygon to be updated as the path traveled
+  // start with two vertices at the same home point
+  // update path with move the last vertex and add more as needed
+}
 
-var createJoystick = function(id, x, y) {
+var updatePath = function(x,y) {
+  // console.log("position (" + x + ", " + y + ")");
+  // update last vertex in polygon (not closed)
+  me.line.vertices[1].x = x - me.icon.translation.x;
+  me.line.vertices[1].y = y - me.icon.translation.y;
 
-    var origin = two.makeCircle(x, y, 40);
-    origin.stroke = '#000000';
-    origin.linewidth = 0;
-    origin.opacity = 0.0;
-    origin.fill = '#000000';
-    background.add(origin);
+  // if near unvisited destination, attach and create new vertex
+  // find closest unvisited node
+  var minDist = 20;
+  var nodeId = -1;
+  for (var i = 0; i < nodes.length; i++) {
+    // only search not yet visited nodes
+    if (nodes[i].visited || (!onlyHomeLeft && nodes[i].home)) continue;
 
-    var thumb = two.makeCircle(x, y, 30);
-    thumb.stroke = '#000000';
-    thumb.linewidth = 0;
-    thumb.opacity = 0.0;
-    thumb.fill = '#000000';
-    background.add(thumb);
+    var xDiff = nodes[i].icon.translation.x - x;
+    var yDiff = nodes[i].icon.translation.y - y;
+    var dist = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+    if(dist < minDist) {
+      nodeId = i;
+      minDist = dist;
+    }
+  }
 
-    joystick = {
-        origin: origin,
-        thumb: thumb,
-        visible: false
-    };
-};
+  // if close to node, attach to it
+  if(nodeId != -1) {
+    // add the node to the connections
+    connections.push({
+      id: nodeId
+    });
 
-var showJoystick = function() {
-    new TWEEN.Tween(joystick.origin)
-        .to({
-            scale: 1,
-            opacity: 0.2
-        }, 250)
-        .easing(TWEEN.Easing.Elastic.Out)
-        .start();
+    if(onlyHomeLeft) {
+      // no longer travelling
+      isTravelling = false;
+      // complete the path
+      makeMeSmall();
+      me.line.vertices[1].x = nodes[nodeId].icon.translation.x - me.icon.translation.x;
+      me.line.vertices[1].y = nodes[nodeId].icon.translation.y - me.icon.translation.y;
+      updateMeToID(nodeId);
+      // set home to visited
+      me.visited = true;
+      // show solution
+      createSolutionShape();
+      // celebrate
+    }
+    else {
+      makeMeSmall();
+      me.line.vertices[1].x = nodes[nodeId].icon.translation.x - me.icon.translation.x;
+      me.line.vertices[1].y = nodes[nodeId].icon.translation.y - me.icon.translation.y;
+      updateMeToID(nodeId);
+      makeMeBig();
+    }
+  }
+}
 
-    new TWEEN.Tween(joystick.thumb)
-        .to({
-            scale: 1,
-            opacity: 0.2
-        }, 250)
-        .easing(TWEEN.Easing.Elastic.Out)
-        .start();
-};
-
-var hideJoystick = function() {
-    new TWEEN.Tween(joystick.origin)
-        .to({
-            scale: 0,
-            opacity: 0.0
-        }, 250)
-        .easing(TWEEN.Easing.Elastic.Out)
-        .start();
-
-    new TWEEN.Tween(joystick.thumb)
-        .to({
-            scale: 0,
-            opacity: 0.0
-        }, 250)
-        .easing(TWEEN.Easing.Elastic.Out)
-        .start();
-
-};
-
-var updateJoystick = function(startX, startY, x, y) {
-    joystick.origin.translation.x = startX;
-    joystick.origin.translation.y = startY;
-    // translate only a fraction of the distance from the center
-    var xDiff = x - startX < 0 ? -Math.sqrt(startX - x) : Math.sqrt(x - startX);
-    var yDiff = y - startY < 0 ? -Math.sqrt(startY - y) : Math.sqrt(y - startY);
-    joystick.thumb.translation.x = startX + xDiff; //startX + Math.sqrt(x - startX); //startX + (20 * Math.cos(angle*Math.Pi/180.0));
-    joystick.thumb.translation.y = startY + yDiff; //startY + Math.sqrt(y - startY); //startY + (20 * Math.sin(angle*Math.Pi/180.0));
+var snapBackToHome = function() {
+  // return line to home
+  new TWEEN.Tween(me.line.vertices[1])
+      .to({
+          x: 0,
+          y: 0
+      }, 200)
+      .easing(TWEEN.Easing.Exponential.Out)
+      .start();
 };
 
 var getTotalConnectionDistance = function() {
@@ -179,9 +183,16 @@ var createNode = function(id, x, y) {
     icon.linewidth = 4;
     icon.fill = '#FFFF00';
 
+    var line = two.makeLine(x, y, x, y);
+    line.stroke = '#000000';
+    line.linewidth = 4;
+    line.opacity = 1;
+    background.add(line);
+
     nodes.push({
         id: id,
         icon: icon,
+        line: line,
         highlight: highlight,
         visited: false,
         home: id == 0 ? true : false,
@@ -212,7 +223,7 @@ var createGuides = function() {
         background.remove(guides[i].preline);
     }
     guides = [];
-    var onlyHomeLeft = true;
+    onlyHomeLeft = true;
     for (var i = 0; i < nodes.length; i++) {
         if (!nodes[i].visited && !nodes[i].home) {
             onlyHomeLeft = false;
@@ -311,22 +322,6 @@ var makeNodeBig = function(id) {
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
-    var x_pos = nodes[id].icon.translation.x - me.icon.translation.x;
-    var y_pos = nodes[id].icon.translation.y - me.icon.translation.y;
-    var guide = guides.filter(function(o) {
-        return o.id == id;
-    });
-    if (guide[0]) {
-        new TWEEN.Tween(guide[0].preline.vertices[1])
-            .to({
-                x: x_pos,
-                y: y_pos
-            }, 500)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start();
-    } else {
-        console.log("this id doesn't have a guide: " + id);
-    }
 };
 
 var makeNodeSmall = function(id) {
@@ -342,20 +337,6 @@ var makeNodeSmall = function(id) {
         }, 750)
         .easing(TWEEN.Easing.Elastic.Out)
         .start();
-    var guide = guides.filter(function(o) {
-        return o.id == id;
-    });
-    if (guide[0]) {
-        new TWEEN.Tween(guide[0].preline.vertices[1])
-            .to({
-                x: 0,
-                y: 0
-            }, 500)
-            .easing(TWEEN.Easing.Exponential.Out)
-            .start();
-    } else {
-        console.log("this id doesn't have a guide: " + id);
-    }
 };
 
 var showGuideLines = function() {
@@ -415,107 +396,6 @@ var getAngleToNode = function(id) {
     angle = (Math.floor(angle * 180 / 3.14159) + 360) % 360;
 
     return angle;
-};
-
-var getNodeClosestToDirection = function(targetAngle) {
-    var id = 0;
-
-    // Might be worth measuring distance and making the selection
-    // based on both angle proximity and distance proximity
-    // i.e. the user most likely wants the closest node in that general
-    // direction, could be frustrating to miss, if easy to miss
-
-    // Algorithm implemented
-    // look at all nodes within 15º either direction and
-    // choose the closest unvisited one.
-
-    var closeNodes = [];
-    var angleThreshold = 15;
-    for (var i = 0; i < nodes.length; i++) {
-        // only search not yet visited nodes
-        if (nodes[i].visited || nodes[i].home) continue;
-
-        var angle = getAngleToNode(i);
-        // console.log("target angle: " + targetAngle + " angle to node: " + angle);
-
-        if ((Math.abs(angle - targetAngle) < angleThreshold) || (Math.abs(360 + angle - targetAngle) < angleThreshold)) {
-            // console.log("added node " + i + " with angle: " + angle);
-            closeNodes.push(nodes[i]);
-        }
-    }
-
-    if (closeNodes.length > 1) {
-        var dist = 1000;
-        var angleDistValue = 100000000; // ideally max value...
-        console.log("--- Begin Close Nodes ---");
-        for (var i = 0; i < closeNodes.length; i++) {
-            var xDiff = Math.abs(closeNodes[i].icon.translation.x - me.icon.translation.x);
-            var yDiff = Math.abs(closeNodes[i].icon.translation.y - me.icon.translation.y);
-            var nodeDist = Math.floor(Math.sqrt(xDiff * xDiff + yDiff * yDiff));
-            var angleDiff = Math.abs(targetAngle - getAngleToNode(closeNodes[i].id));
-            console.log("node " + closeNodes[i].id + " at distance: " + nodeDist + " with angleDiff: " + angleDiff);
-            if (getAngleDistValue(angleDiff, nodeDist) < angleDistValue) {
-                id = closeNodes[i].id;
-                angleDistValue = getAngleDistValue(angleDiff, nodeDist);
-            }
-            // if (nodeDist < dist) {
-            //     id = closeNodes[i].id;
-            //     dist = nodeDist;
-            // }
-        }
-        console.log("--- End Close Nodes ---");
-        return id;
-    }
-
-    // or just find the closest old fashioned style
-    var diff = 360;
-
-    for (var i = 0; i < nodes.length; i++) {
-
-        // only search not yet visited nodes
-        if (nodes[i].visited || nodes[i].home) continue;
-
-        var angle = getAngleToNode(i);
-        if (Math.abs(angle - targetAngle) < diff) {
-            diff = Math.abs(angle - targetAngle);
-            id = i;
-        }
-        if (Math.abs(360 + angle - targetAngle) < diff) {
-            diff = Math.abs(angle - targetAngle);
-            id = i;
-        }
-    }
-
-    // if the angle diff is really big, maybe open up the angleThreshold and try that again...
-
-    return id;
-};
-
-var getAngleDistValue = function(angle, distance) {
-    // return distance * Math.sqrt(angle);
-    return distance + (10 * angle);
-    // return distance + (100 * angle / distance);
-}
-
-var updateLineDirection = function(angle) {
-
-    var nodeID = getNodeClosestToDirection(angle);
-    if (selectedNodeID < 0) {
-        makeNodeBig(nodeID);
-        selectedNodeID = nodeID;
-    } else if (selectedNodeID != nodeID) {
-        makeNodeSmall(selectedNodeID);
-        makeNodeBig(nodeID);
-        selectedNodeID = nodeID;
-    }
-};
-
-var isComplete = function() {
-    for (var i = 0; i < nodes.length; i++) {
-        if (!nodes[i].visited)
-            return false;
-    }
-    return true;
 };
 
 // fill the solution with a polygon
@@ -612,7 +492,6 @@ $(function() {
     two.update();
 
     initNodes();
-    createJoystick();
 
     _.defer(function() {
 
@@ -643,14 +522,25 @@ obj.addEventListener('touchstart', function(event) {
         var touch = event.targetTouches[0];
         // location of touch
         // console.log("began touch: (" + touch.pageX + ", " + touch.pageY + ")");
-        // document.getElementById('x_coord_start').innerHTML = Math.floor(touch.pageX);
-        // document.getElementById('y_coord_start').innerHTML = Math.floor(touch.pageY);
-        startTouchPoint.x = touch.pageX;
-        startTouchPoint.y = touch.pageY;
-        makeMeBig();
-        showGuideLines();
-        showJoystick();
-        updateJoystick(startTouchPoint.x, startTouchPoint.y, startTouchPoint.x, startTouchPoint.y);
+
+        var xDiff = Math.abs(me.icon.translation.x - touch.pageX);
+        var yDiff = Math.abs(me.icon.translation.y - touch.pageY);
+        var distFromTraveler = Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+        // console.log("distFromTraveler = " + distFromTraveler);
+        if(distFromTraveler < 30) {
+          // if close enough to active node, grab the line to drag to destinations
+          makeMeBig();
+          // set dragging to true
+          isTravelling = true;
+          // create line to drag
+          updatePath(touch.pageX, touch.pageY);
+        }
+        else {
+          // if not close enough to active node, show guide lines and suggest drag from head of trail
+          showGuideLines();
+          // set dragging to false
+          isTravelling = false;
+        }
     }
 }, false);
 
@@ -660,17 +550,20 @@ obj.addEventListener('touchmove', function(event) {
         var touch = event.targetTouches[0];
         // location of touch
         // console.log("moved touch: (" + touch.pageX + ", " + touch.pageY + ")");
-        // document.getElementById('x_coord_move').innerHTML = Math.floor(touch.pageX);
-        // document.getElementById('y_coord_move').innerHTML = Math.floor(touch.pageY);
 
-        // update angle
-        var angle = Math.atan2(startTouchPoint.y - touch.pageY, touch.pageX - startTouchPoint.x);
-        angle = ((angle * 180 / 3.14159) + 360) % 360;
-
-        document.getElementById('angle').innerHTML = Math.floor(angle);
-
-        updateLineDirection(angle);
-        updateJoystick(startTouchPoint.x, startTouchPoint.y, touch.pageX, touch.pageY);
+        // if started travelling
+        if(isTravelling) {
+          updatePath(touch.pageX, touch.pageY);
+          // if close enough to unvisited node, attach to node and update the travelers position
+          // do not connect to the origin node, only connect to the origin node upon touch end
+          // if close enough to last visited node for >1 second,
+          // indicate removal and remove point from path travelled
+        }
+        else{
+          // reinforce the need to start from the head of the trail
+          // or hint at possible paths... ghostly flashes of possible connections for 200ms each...
+          // flickerGuides();
+        }
     }
 }, false);
 
@@ -679,40 +572,26 @@ obj.addEventListener('touchend', function(event) {
         var touch = event.changedTouches[0];
         // location of touch
         // console.log("ended touch: (" + touch.pageX + ", " + touch.pageY + ")");
-        // document.getElementById('x_coord_end').innerHTML = Math.floor(touch.pageX);
-        // document.getElementById('y_coord_end').innerHTML = Math.floor(touch.pageY);
 
-        // update angle
-        var angle = Math.atan2(startTouchPoint.y - touch.pageY, touch.pageX - startTouchPoint.x);
-        angle = ((angle * 180 / 3.14159) + 360) % 360;
+        // if close enough to final node, attach to final node and update the travelers position
+        // celebrate completion
 
-        document.getElementById('angle').innerHTML = Math.floor(angle);
+        // otherwise
+        // spring back to last attached node
+        if(isTravelling) {
+          snapBackToHome();
+          // if I am big, make me small
+          makeMeSmall();
+        }
 
-        // choose item closest to angle to travel to
-        var nodeID = getNodeClosestToDirection(angle);
-        // var nodeID = Math.floor(20*Math.random());
-
-        makeMeSmall();
-        makeNodeSmall(nodeID);
+        // if showing guide lines, they should hide
         hideGuideLines();
-        createConnectionToNode(nodeID);
-        hideJoystick();
 
-        console.log("now at: " + nodeID + " node");
-        updateMeToID(nodeID);
-
+        // calculate distance traveled
         var dist = getTotalConnectionDistance();
         document.getElementById('distance').innerHTML = dist;
         document.getElementById('sum-distance').innerHTML = dist;
-
-        if (isComplete() && !isSolved) {
-            isSolved = true;
-            createSolutionShape();
-        }
     }
-    // makePlayerSmall(selectedPlayerID);
-    // hideGuideLines();
-    // drawToSelectedPlayer();
 }, false);
 
 // more cities button
@@ -752,10 +631,9 @@ document.getElementById("resetButton").addEventListener("click", function() {
     // make all nodes not visited
     for (var i = 0; i < nodes.length; i++) {
         nodes[i].visited = false;
-    }
-    // remove leftover connections
-    for (var i = 0; i < connections.length; i++) {
-        background.remove(connections[i].line);
+        // return connections
+        nodes[i].line.vertices[1].x = 0;
+        nodes[i].line.vertices[1].y = 0;
     }
     // remove solution
     if (solutionPolygon) {
